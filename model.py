@@ -295,14 +295,3 @@ def build_transformer(src_vocab_size :int , tgt_vocab_size : int ,
 
     return transformer
 
-
-
-
-
-
-
-
-
-
-
-
