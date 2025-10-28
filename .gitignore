@@ -1,0 +1,10 @@
+.venv/
+weights/
+runs/
+datasetOLD.py
+modelOLD.py
+requirements.txt
+tokenizer_en.json
+tokenizer_fr.json
+trainOLD.py
+__pycache__/

@@ -3,9 +3,9 @@ from pathlib import Path
 def get_config():
     return {
         "batch_size" : 8,
-        "num_epochs" : 20,
+        "num_epochs" : 2,
         "lr" : 10**-4,
-        "seq_len" : 350,
+        "seq_len" : 600,
         "d_model" : 512,
         "lang_src" : "en",
         "lang_tgt" : "fr",
@@ -19,6 +19,6 @@ def get_config():
 def get_weights_file_path(config , epoch : str):
     model_folder = config["model_folder"]
     model_basename = config["model_basename"]
-    model_filename = f'{model_basename}{epoch}.pt'
+    model_filename = f'{model_basename}{epoch}'
 
     return str(Path(',') / model_folder / model_filename)
