@@ -157,7 +157,6 @@ def get_ds(config):
     
     for item in ds_raw:
         src_ids = tokenizer_src.encode(item['translation'][config['lang_src']]).ids
-        # FIX 2: Used tokenizer_tgt for the target language
         tgt_ids = tokenizer_tgt.encode(item['translation'][config['lang_tgt']]).ids
         max_len_src = max(max_len_src, len(src_ids))
         max_len_tgt = max(max_len_tgt, len(tgt_ids))
@@ -209,7 +208,7 @@ def train_model(config):
         optimizer.load_state_dict(state['optimizer_state_dict'])
         global_step = state['global_step']
 
-    # FIX 3: Loss function must ignore the PAD token from the TARGET tokenizer
+        
     loss_fn = nn.CrossEntropyLoss(ignore_index= tokenizer_tgt.token_to_id('[PAD]'), label_smoothing=0.1).to(device)
 
     for epoch in range(initial_epoch , config['num_epochs']):

@@ -16,7 +16,7 @@ class InputEmbedding(nn.Module):
 
 
 class PositionalEncoding(nn.Module):
-    # FIX 1: Corrected super().__init__()
+
     def __init__(self , d_model : int, seq_len : int , dropout : float):
         super().__init__()
         self.d_model = d_model
@@ -29,7 +29,6 @@ class PositionalEncoding(nn.Module):
 
         #Creating a vector of shape (seq_len, 1)
         position = torch.arange(0 , seq_len, dtype = torch.float).unsqueeze(1)
-        # FIX 2: Corrected arange to go from 0 to d_model, 2 steps at a time
         div_term = torch.exp(torch.arange(0 , d_model, 2, dtype = torch.float) * (-math.log(10000.0) / d_model))
 
         #apply the sin function to even the indices in the d_model 
@@ -43,16 +42,13 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe' , pe)
 
     def forward(self , x):
-        # FIX 3: Corrected x.shape(1) to x.shape[1]
         x = x + (self.pe[:, :x.shape[1] , :]).requires_grad_(False)
         return self.dropout(x)
 
 
 class LayerNormalization(nn.Module):
-    # FIX 4: Changed default eps from 10**6 (1 million) to 1e-6 (a small number)
     def __init__(self , eps : float = 1e-6) -> None :
         super().__init__()
-        # FIX 5: Stored eps as self.eps (was self.esp)
         self.eps = eps 
         self.alpha = nn.Parameter(torch.ones(1)) #multiplied (learnable scale)
         self.bias = nn.Parameter(torch.zeros(1)) #added (learnable shift)
@@ -61,7 +57,6 @@ class LayerNormalization(nn.Module):
     def forward(self , x):
         mean = x.mean(dim = -1 , keepdim = True)
         std = x.std(dim = -1 , keepdim = True)
-        # FIX 6: Used self.eps (was self.esp)
         return self.alpha * (x - mean) / (std + self.eps) + self.bias
     
 
@@ -99,7 +94,6 @@ class MultiHeadAttention(nn.Module):
 
 
     @staticmethod
-    # FIX 7: Corrected type hint for dropout
     def attention(query, key, value, mask, dropout: nn.Dropout = None):
         d_k = query.shape[-1]
 
@@ -117,9 +111,8 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self , q , k , v , mask):
         query = self.w_q(q)
-        # FIX 8: Typo. Should be self.w_k
+
         key = self.w_k(k)
-        # FIX 9: Typo. Should be self.w_v
         value = self.w_v(v)
 
         # (Batch, seq_len, d_model) --> (Batch, seq_len, h, d_k) --> (Batch, h, seq_len, d_k)
@@ -157,7 +150,6 @@ class EncoderBlock(nn.Module):
         self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
 
     def forward(self , x, src_mask):
-        # FIX 10: Typo. Was self.self_attention, should be self.self_attention_block
         x = self.residual_connections[0](x , lambda x : self.self_attention_block(x , x , x , src_mask))
         x = self.residual_connections[1](x , self.feed_forward_block)
         return x
@@ -188,13 +180,10 @@ class DecoderBlock(nn.Module):
     def forward(self , x , encoder_output , src_mask , tgt_mask):
         # Self-Attention
         x = self.residual_connections[0](x , lambda x : self.self_attention_block(x ,x ,x , tgt_mask))
-        # FIX 11: Indexing error. Should be [1]
         # Cross-Attention
         x = self.residual_connections[1](x , lambda x : self.cross_attention_block(x , encoder_output , encoder_output , src_mask))
-        # FIX 12: Indexing error. Should be [2]
         # Feed Forward
         x = self.residual_connections[2](x , self.feed_forward_block)
-        # FIX 13: Critical. Missing return statement.
         return x
 
 
